@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { Header } from '../components/Header';
 import { Task, TasksList } from '../components/TasksList';
@@ -9,6 +9,11 @@ export function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   function handleAddTask(newTaskTitle: string) {
+    const taskWithSameTitle = tasks.find(task => task.title === newTaskTitle);
+
+    if(taskWithSameTitle) {
+      return Alert.alert('Ops!', 'Tarefa já existe');
+    }
     const newTask: Task = {
       id: new Date().getTime(),
       title: newTaskTitle,
@@ -22,7 +27,21 @@ export function Home() {
   }
 
   function handleRemoveTask(id: number) {
-    setTasks(tasks.filter(task => task.id !== id));
+     Alert.alert('Remover item', 'Tem certeza que você deseja remover esse item?',[
+       {
+        style: 'cancel',
+        text: 'Não',
+       },
+       {
+        style: 'destructive',
+        text: 'Sim',
+        onPress: () => setTasks(tasks.filter(task => task.id !== id)),
+       }
+     ])
+  }
+
+  function handleEditTask(id: number, title: string) {
+    setTasks(tasks.map(task => task.id === id ? { ...task, title } : task));
   }
 
   return (
@@ -35,6 +54,7 @@ export function Home() {
         tasks={tasks} 
         toggleTaskDone={handleToggleTaskDone}
         removeTask={handleRemoveTask} 
+        editTask={handleEditTask}
       />
     </View>
   )
